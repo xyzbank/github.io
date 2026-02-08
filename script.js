@@ -1,4 +1,5 @@
 // XYZBank - Полноценная банковская система с выпуском карт и переводами
+// (ИСПРАВЛЕННАЯ ВЕРСИЯ - Убрано автооткрытие модальных окон)
 
 // ==================== СИСТЕМА ХРАНЕНИЯ ДАННЫХ ====================
 const STORAGE_KEYS = {
@@ -126,14 +127,6 @@ function getTransactions() {
 
 function saveTransactions(transactions) {
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
-}
-
-function getClickerData() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CLICKER_DATA)) || {};
-}
-
-function saveClickerData(data) {
-    localStorage.setItem(STORAGE_KEYS.CLICKER_DATA, JSON.stringify(data));
 }
 
 // ==================== СИСТЕМА АВТОРИЗАЦИИ ====================
@@ -767,7 +760,11 @@ function updateNavbar() {
             </button>
         `;
         
-        document.getElementById('userLogoutBtn')?.addEventListener('click', logout);
+        // Убедимся, что обработчик добавляется только один раз
+        const logoutBtn = document.getElementById('userLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.onclick = logout;
+        }
     } else {
         navActions.innerHTML = `
             <button class="btn btn-outline" id="navLoginBtn">
@@ -778,8 +775,18 @@ function updateNavbar() {
             </button>
         `;
         
-        document.getElementById('navLoginBtn')?.addEventListener('click', showLoginModal);
-        document.getElementById('navRegisterBtn')?.addEventListener('click', showRegisterModal);
+        // Добавляем обработчики для кнопок входа/регистрации
+        setTimeout(() => {
+            const loginBtn = document.getElementById('navLoginBtn');
+            const registerBtn = document.getElementById('navRegisterBtn');
+            
+            if (loginBtn) {
+                loginBtn.onclick = showLoginModal;
+            }
+            if (registerBtn) {
+                registerBtn.onclick = showRegisterModal;
+            }
+        }, 100);
     }
 }
 
@@ -806,8 +813,18 @@ function updateHeroSection() {
             </button>
         `;
         
-        document.getElementById('heroLoginBtn')?.addEventListener('click', showLoginModal);
-        document.getElementById('heroRegisterBtn')?.addEventListener('click', showRegisterModal);
+        // Добавляем обработчики
+        setTimeout(() => {
+            const heroLoginBtn = document.getElementById('heroLoginBtn');
+            const heroRegisterBtn = document.getElementById('heroRegisterBtn');
+            
+            if (heroLoginBtn) {
+                heroLoginBtn.onclick = showLoginModal;
+            }
+            if (heroRegisterBtn) {
+                heroRegisterBtn.onclick = showRegisterModal;
+            }
+        }, 100);
     }
 }
 
@@ -966,7 +983,13 @@ function updateCardsList() {
             </div>
         `;
         
-        document.getElementById('addFirstCardBtn')?.addEventListener('click', showCardModal);
+        // Добавляем обработчик для кнопки выпуска карты
+        setTimeout(() => {
+            const addFirstCardBtn = document.getElementById('addFirstCardBtn');
+            if (addFirstCardBtn) {
+                addFirstCardBtn.onclick = showCardModal;
+            }
+        }, 100);
         return;
     }
     
@@ -1092,53 +1115,61 @@ function updateUsersList() {
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
 function showLoginModal() {
     const modal = document.getElementById('loginModal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function showRegisterModal() {
     const modal = document.getElementById('registerModal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function showTransferModal() {
     const modal = document.getElementById('transferModal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Сброс формы
-    const form = document.getElementById('transferForm');
-    if (form) form.reset();
-    
-    // Сброс значений комиссии
-    updateCommission(0);
-    
-    // Установка активной вкладки
-    const tabs = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabs.forEach(tab => tab.classList.remove('active'));
-    tabContents.forEach(content => content.classList.remove('active'));
-    
-    const firstTab = tabs[0];
-    const firstContent = document.getElementById(`tab-${firstTab.dataset.tab}`);
-    
-    if (firstTab && firstContent) {
-        firstTab.classList.add('active');
-        firstContent.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Сброс формы
+        const form = document.getElementById('transferForm');
+        if (form) form.reset();
+        
+        // Сброс значений комиссии
+        updateCommission(0);
+        
+        // Установка активной вкладки
+        const tabs = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => tab.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        const firstTab = tabs[0];
+        const firstContent = document.getElementById(`tab-${firstTab?.dataset.tab}`);
+        
+        if (firstTab && firstContent) {
+            firstTab.classList.add('active');
+            firstContent.classList.add('active');
+        }
     }
 }
 
 function showCardModal() {
     const modal = document.getElementById('cardModal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Выбор типа карты по умолчанию
-    const options = document.querySelectorAll('.card-option');
-    options.forEach(option => option.classList.remove('active'));
-    if (options[0]) options[0].classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Выбор типа карты по умолчанию
+        const options = document.querySelectorAll('.card-option');
+        options.forEach(option => option.classList.remove('active'));
+        if (options[0]) options[0].classList.add('active');
+    }
 }
 
 function hideModals() {
@@ -1315,58 +1346,104 @@ function setupEventListeners() {
     });
     
     // Кнопки в кликере
-    document.getElementById('promptLoginBtn')?.addEventListener('click', showLoginModal);
-    document.getElementById('promptRegisterBtn')?.addEventListener('click', showRegisterModal);
+    const promptLoginBtn = document.getElementById('promptLoginBtn');
+    const promptRegisterBtn = document.getElementById('promptRegisterBtn');
+    
+    if (promptLoginBtn) {
+        promptLoginBtn.addEventListener('click', showLoginModal);
+    }
+    if (promptRegisterBtn) {
+        promptRegisterBtn.addEventListener('click', showRegisterModal);
+    }
     
     // Кнопки в личном кабинете
-    document.getElementById('quickTransferBtn')?.addEventListener('click', showTransferModal);
-    document.getElementById('quickTransferBtn2')?.addEventListener('click', () => {
-        const cardNumber = document.getElementById('quickCardNumber')?.value;
-        const amount = parseFloat(document.getElementById('quickAmount')?.value);
-        
-        if (cardNumber && amount) {
-            if (transferMoney(currentUser.id, cardNumber, amount, 'Быстрый перевод')) {
-                document.getElementById('quickCardNumber').value = '';
-                document.getElementById('quickAmount').value = '';
-            }
-        } else {
-            showTransferModal();
-        }
-    });
+    const quickTransferBtn = document.getElementById('quickTransferBtn');
+    const quickTransferBtn2 = document.getElementById('quickTransferBtn2');
+    const issueCardBtnMain = document.getElementById('issueCardBtnMain');
+    const addCardBtn = document.getElementById('addCardBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const refreshBalance = document.getElementById('refreshBalance');
+    const clearHistory = document.getElementById('clearHistory');
     
-    document.getElementById('issueCardBtnMain')?.addEventListener('click', showCardModal);
-    document.getElementById('addCardBtn')?.addEventListener('click', showCardModal);
-    document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    document.getElementById('refreshBalance')?.addEventListener('click', updateDashboard);
-    document.getElementById('clearHistory')?.addEventListener('click', () => {
-        if (confirm('Очистить историю операций?')) {
-            // Очищаем только транзакции текущего пользователя
-            const transactions = getTransactions();
-            const filteredTransactions = transactions.filter(t => t.userId !== currentUser.id);
-            saveTransactions(filteredTransactions);
-            updateHistoryList();
-            showNotification('История операций очищена', 'success');
-        }
-    });
+    if (quickTransferBtn) {
+        quickTransferBtn.addEventListener('click', showTransferModal);
+    }
+    
+    if (quickTransferBtn2) {
+        quickTransferBtn2.addEventListener('click', () => {
+            const cardNumber = document.getElementById('quickCardNumber')?.value;
+            const amount = parseFloat(document.getElementById('quickAmount')?.value);
+            
+            if (cardNumber && amount) {
+                if (transferMoney(currentUser.id, cardNumber, amount, 'Быстрый перевод')) {
+                    document.getElementById('quickCardNumber').value = '';
+                    document.getElementById('quickAmount').value = '';
+                }
+            } else {
+                showTransferModal();
+            }
+        });
+    }
+    
+    if (issueCardBtnMain) {
+        issueCardBtnMain.addEventListener('click', showCardModal);
+    }
+    
+    if (addCardBtn) {
+        addCardBtn.addEventListener('click', showCardModal);
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+    
+    if (refreshBalance) {
+        refreshBalance.addEventListener('click', updateDashboard);
+    }
+    
+    if (clearHistory) {
+        clearHistory.addEventListener('click', () => {
+            if (confirm('Очистить историю операций?')) {
+                // Очищаем только транзакции текущего пользователя
+                const transactions = getTransactions();
+                const filteredTransactions = transactions.filter(t => t.userId !== currentUser.id);
+                saveTransactions(filteredTransactions);
+                updateHistoryList();
+                showNotification('История операций очищена', 'success');
+            }
+        });
+    }
     
     // Закрытие модальных окон
-    document.getElementById('closeLoginModal')?.addEventListener('click', hideModals);
-    document.getElementById('closeRegisterModal')?.addEventListener('click', hideModals);
-    document.getElementById('closeTransferModal')?.addEventListener('click', hideModals);
-    document.getElementById('closeCardModal')?.addEventListener('click', hideModals);
+    const closeLoginModal = document.getElementById('closeLoginModal');
+    const closeRegisterModal = document.getElementById('closeRegisterModal');
+    const closeTransferModal = document.getElementById('closeTransferModal');
+    const closeCardModal = document.getElementById('closeCardModal');
+    
+    if (closeLoginModal) closeLoginModal.addEventListener('click', hideModals);
+    if (closeRegisterModal) closeRegisterModal.addEventListener('click', hideModals);
+    if (closeTransferModal) closeTransferModal.addEventListener('click', hideModals);
+    if (closeCardModal) closeCardModal.addEventListener('click', hideModals);
     
     // Переключение между модальными окнами
-    document.getElementById('switchToRegister')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        hideModals();
-        setTimeout(showRegisterModal, 300);
-    });
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin = document.getElementById('switchToLogin');
     
-    document.getElementById('switchToLogin')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        hideModals();
-        setTimeout(showLoginModal, 300);
-    });
+    if (switchToRegister) {
+        switchToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideModals();
+            setTimeout(showRegisterModal, 300);
+        });
+    }
+    
+    if (switchToLogin) {
+        switchToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideModals();
+            setTimeout(showLoginModal, 300);
+        });
+    }
     
     // Форма входа
     const loginForm = document.getElementById('loginForm');
@@ -1437,14 +1514,17 @@ function setupEventListeners() {
     }
     
     // Выпуск карты
-    document.getElementById('issueCardBtn')?.addEventListener('click', () => {
-        const selectedOption = document.querySelector('.card-option.active');
-        const cardType = selectedOption?.dataset.type || 'debit';
-        
-        if (issueCard(cardType)) {
-            hideModals();
-        }
-    });
+    const issueCardBtn = document.getElementById('issueCardBtn');
+    if (issueCardBtn) {
+        issueCardBtn.addEventListener('click', () => {
+            const selectedOption = document.querySelector('.card-option.active');
+            const cardType = selectedOption?.dataset.type || 'debit';
+            
+            if (issueCard(cardType)) {
+                hideModals();
+            }
+        });
+    }
     
     // Выбор типа карты
     document.querySelectorAll('.card-option').forEach(option => {
@@ -1646,3 +1726,5 @@ window.showCardDetails = function(cardId) {
     
     showNotification(details.replace(/\n/g, '<br>'), 'info');
 };
+
+window.scrollToSection = scrollToSection;
