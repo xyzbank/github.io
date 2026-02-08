@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZBank – Надежный банк для ваших финансов</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <div class="logo-icon">XYZ</div>
+                    <span class="logo-text">Bank</span>
+                </a>
+                
+                <div class="nav-menu">
+                    <a href="#home" class="nav-link active">Главная</a>
+                    <a href="#services" class="nav-link">Услуги</a>
+                    <a href="#advantages" class="nav-link">Преимущества</a>
+                    <a href="#tariffs" class="nav-link">Тарифы</a>
+                    <a href="#contact" class="nav-link">Контакты</a>
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="btn btn-outline" id="loginBtn">Вход</button>
+                    <button class="btn btn-primary" id="registerBtn">Открыть счет</button>
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Финансы, которые работают на вас</h1>
+                <p class="hero-subtitle">XYZBank предлагает современные банковские решения с выгодными условиями и надежной защитой ваших средств</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" id="calcBtn">
+                        <i class="fas fa-calculator"></i> Кредитный калькулятор
+                    </button>
+                    <a href="#services" class="btn btn-secondary btn-large">
+                        <i class="fas fa-arrow-circle-right"></i> Наши услуги
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="card-visual">
+                    <div class="card card-premium">
+                        <div class="card-chip"></div>
+                        <div class="card-number">•••• 4567</div>
+                        <div class="card-info">
+                            <span class="card-name">ВЛАДЕЛЕЦ КАРТЫ</span>
+                            <span class="card-expiry">12/28</span>
+                        </div>
+                        <div class="card-logo">XYZ</div>
+                    </div>
+                    <div class="card card-standard">
+                        <div class="card-chip"></div>
+                        <div class="card-number">•••• 8912</div>
+                        <div class="card-info">
+                            <span class="card-name">ВЛАДЕЛЕЦ КАРТЫ</span>
+                            <span class="card-expiry">09/27</span>
+                        </div>
+                        <div class="card-logo">XYZ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+        <div class="container">
+            <h2 class="section-title">Наши услуги</h2>
+            <p class="section-subtitle">Полный спектр банковских услуг для частных лиц и бизнеса</p>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3 class="service-title">Дебетовые карты</h3>
+                    <p class="service-description">Карты с кэшбэком до 10%, бесплатным обслуживанием и удобным мобильным приложением</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3 class="service-title">Ипотечное кредитование</h3>
+                    <p class="service-description">Выгодные ипотечные программы с минимальной ставкой от 6.5% годовых</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="service-title">Инвестиции</h3>
+                    <p class="service-description">Доверительное управление, индивидуальные инвестиционные стратегии</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3 class="service-title">Вклады</h3>
+                    <p class="service-description">Высокие процентные ставки по вкладам с ежемесячной капитализацией</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="service-title">Мобильный банк</h3>
+                    <p class="service-description">Управление финансами в одном приложении с биометрической защитой</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-business-time"></i>
+                    </div>
+                    <h3 class="service-title">Бизнес-решения</h3>
+                    <p class="service-description">Расчетно-кассовое обслуживание, кредитование бизнеса, зарплатные проекты</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages -->
+    <section class="advantages" id="advantages">
+        <div class="container">
+            <div class="advantages-content">
+                <h2 class="section-title">Почему выбирают XYZBank?</h2>
+                <p class="section-subtitle">Мы создаем банковские продукты, которые действительно нужны нашим клиентам</p>
+                
+                <div class="advantages-list">
+                    <div class="advantage-item">
+                        <div class="advantage-number">01</div>
+                        <div class="advantage-text">
+                            <h3>Надежность</h3>
+                            <p>Банк входит в топ-10 по надежности согласно рейтингу ЦБ РФ. Все вклады застрахованы АСВ.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="advantage-item">
+                        <div class="advantage-number">02</div>
+                        <div class="advantage-text">
+                            <h3>Технологии</h3>
+                            <p>Собственная разработка мобильного приложения с Face ID и функцией моментальных переводов.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="advantage-item">
+                        <div class="advantage-number">03</div>
+                        <div class="advantage-text">
+                            <h3>Выгода</h3>
+                            <p>Самые низкие процентные ставки по кредитам и самые высокие — по вкладам на рынке.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="advantage-item">
+                        <div class="advantage-number">04</div>
+                        <div class="advantage-text">
+                            <h3>Поддержка 24/7</h3>
+                            <p>Круглосуточная служба поддержки в приложении, чате и по телефону. Среднее время ответа — 2 минуты.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="advantages-stats">
+                <div class="stat-card">
+                    <div class="stat-number">850K+</div>
+                    <div class="stat-label">Довольных клиентов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Доступность сервиса</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Надежность операций</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Лет на рынке</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tariffs -->
+    <section class="tariffs" id="tariffs">
+        <div class="container">
+            <h2 class="section-title">Популярные тарифы</h2>
+            <p class="section-subtitle">Выберите подходящий пакет услуг</p>
+            
+            <div class="tariffs-grid">
+                <div class="tariff-card">
+                    <div class="tariff-header">
+                        <h3 class="tariff-title">Базовый</h3>
+                        <div class="tariff-price">0 ₽<span class="tariff-period">/месяц</span></div>
+                    </div>
+                    <ul class="tariff-features">
+                        <li><i class="fas fa-check"></i> Дебетовая карта с кэшбэком 1%</li>
+                        <li><i class="fas fa-check"></i> Мобильный банк</li>
+                        <li><i class="fas fa-check"></i> 2 бесплатных перевода в месяц</li>
+                        <li><i class="fas fa-times"></i> Премиальная поддержка</li>
+                        <li><i class="fas fa-times"></i> Индивидуальный менеджер</li>
+                    </ul>
+                    <button class="btn btn-outline btn-block">Выбрать тариф</button>
+                </div>
+                
+                <div class="tariff-card featured">
+                    <div class="tariff-badge">Популярный</div>
+                    <div class="tariff-header">
+                        <h3 class="tariff-title">Премиум</h3>
+                        <div class="tariff-price">499 ₽<span class="tariff-period">/месяц</span></div>
+                    </div>
+                    <ul class="tariff-features">
+                        <li><i class="fas fa-check"></i> Премиальная карта с кэшбэком 5%</li>
+                        <li><i class="fas fa-check"></i> Все возможности мобильного банка</li>
+                        <li><i class="fas fa-check"></i> Неограниченные переводы</li>
+                        <li><i class="fas fa-check"></i> Премиальная поддержка 24/7</li>
+                        <li><i class="fas fa-check"></i> Персональный менеджер</li>
+                    </ul>
+                    <button class="btn btn-primary btn-block">Выбрать тариф</button>
+                </div>
+                
+                <div class="tariff-card">
+                    <div class="tariff-header">
+                        <h3 class="tariff-title">Бизнес</h3>
+                        <div class="tariff-price">1 999 ₽<span class="tariff-period">/месяц</span></div>
+                    </div>
+                    <ul class="tariff-features">
+                        <li><i class="fas fa-check"></i> Корпоративная карта для сотрудников</li>
+                        <li><i class="fas fa-check"></i> Полный пакет бизнес-услуг</li>
+                        <li><i class="fas fa-check"></i> Бухгалтерская отчетность</li>
+                        <li><i class="fas fa-check"></i> Персональный бизнес-консультант</li>
+                        <li><i class="fas fa-check"></i> Облачная бухгалтерия</li>
+                    </ul>
+                    <button class="btn btn-outline btn-block">Выбрать тариф</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Modal -->
+    <div class="modal" id="calculatorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Кредитный калькулятор</h3>
+                <button class="modal-close" id="closeCalcModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="calculator">
+                    <div class="calculator-inputs">
+                        <div class="input-group">
+                            <label for="loanAmount">Сумма кредита (₽)</label>
+                            <input type="range" id="loanAmount" min="100000" max="5000000" step="100000" value="1000000">
+                            <div class="input-value">
+                                <span id="loanAmountValue">1 000 000</span> ₽
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="loanTerm">Срок кредита (месяцев)</label>
+                            <input type="range" id="loanTerm" min="12" max="120" step="12" value="60">
+                            <div class="input-value">
+                                <span id="loanTermValue">60</span> месяцев
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="interestRate">Процентная ставка (%)</label>
+                            <input type="range" id="interestRate" min="5" max="20" step="0.1" value="9.5">
+                            <div class="input-value">
+                                <span id="interestRateValue">9.5</span> %
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-results">
+                        <div class="result-card">
+                            <div class="result-label">Ежемесячный платеж</div>
+                            <div class="result-value" id="monthlyPayment">21 247 ₽</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Общая переплата</div>
+                            <div class="result-value" id="totalOverpayment">274 820 ₽</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Общая сумма</div>
+                            <div class="result-value" id="totalAmount">1 274 820 ₽</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" id="applyLoan">
+                        <i class="fas fa-paper-plane"></i> Оформить заявку
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">XYZ</div>
+                        <span class="logo-text">Bank</span>
+                    </a>
+                    <p class="footer-description">XYZBank — современный банк с традиционными ценностями. Надежность, выгода и инновации с 2008 года.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-phone"></i> 8 (800) 555-35-35</li>
+                        <li><i class="fas fa-envelope"></i> info@xyzbank.ru</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Банковская, д. 1</li>
+                        <li><i class="fas fa-clock"></i> Пн-Пт: 9:00-20:00, Сб: 10:00-18:00</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Быстрые ссылки</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#services">Услуги</a></li>
+                        <li><a href="#advantages">Преимущества</a></li>
+                        <li><a href="#tariffs">Тарифы</a></li>
+                        <li><a href="#">Карьера в банке</a></li>
+                        <li><a href="#">Новости</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Мобильные приложения</h4>
+                    <div class="app-links">
+                        <a href="#" class="app-link">
+                            <i class="fab fa-apple"></i>
+                            <div>
+                                <span>Загрузите в</span>
+                                <strong>App Store</strong>
+                            </div>
+                        </a>
+                        <a href="#" class="app-link">
+                            <i class="fab fa-google-play"></i>
+                            <div>
+                                <span>Доступно в</span>
+                                <strong>Google Play</strong>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Ваши данные под защитой</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    © 2023 XYZBank. Все права защищены. Лицензия ЦБ РФ № 1234 от 01.01.2008
+                </div>
+                <div class="footer-legal">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Пользовательское соглашение</a>
+                    <a href="#">Раскрытие информации</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
