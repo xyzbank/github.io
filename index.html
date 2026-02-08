@@ -3,42 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYZBank – Современный банк с реальными переводами</title>
+    <title>XYZBank – Современный банк</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏦</text></svg>">
 </head>
 <body>
     <!-- Модальные окна -->
     <div class="modal" id="loginModal">
         <div class="modal-content auth-modal">
             <div class="modal-header">
-                <h3><i class="fas fa-sign-in-alt"></i> Вход в личный кабинет</h3>
+                <h3><i class="fas fa-sign-in-alt"></i> Вход</h3>
                 <button class="modal-close" id="closeLoginModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <label for="loginEmail">Email</label>
                         <input type="email" id="loginEmail" placeholder="ваш@email.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="loginPassword"><i class="fas fa-lock"></i> Пароль</label>
-                        <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" placeholder="Пароль" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-sign-in-alt"></i> Войти
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-block">Войти</button>
                 </form>
                 <div class="auth-switch">
                     Нет аккаунта? <a href="#" id="switchToRegister">Зарегистрироваться</a>
                 </div>
                 <div class="demo-credentials">
-                    <h4><i class="fas fa-info-circle"></i> Демо-доступ:</h4>
+                    <h4>Демо-доступ:</h4>
                     <p><strong>Email:</strong> <code>demo@xyzbank.ru</code></p>
                     <p><strong>Пароль:</strong> <code>demo123</code></p>
-                    <p><strong>Номер карты:</strong> <code>4455 6677 8899 0011</code></p>
                 </div>
             </div>
         </div>
@@ -47,30 +43,28 @@
     <div class="modal" id="registerModal">
         <div class="modal-content auth-modal">
             <div class="modal-header">
-                <h3><i class="fas fa-user-plus"></i> Регистрация нового счета</h3>
+                <h3><i class="fas fa-user-plus"></i> Регистрация</h3>
                 <button class="modal-close" id="closeRegisterModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="registerForm">
                     <div class="form-group">
-                        <label for="regName"><i class="fas fa-user"></i> ФИО</label>
+                        <label for="regName">ФИО</label>
                         <input type="text" id="regName" placeholder="Иванов Иван Иванович" required>
                     </div>
                     <div class="form-group">
-                        <label for="regEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <label for="regEmail">Email</label>
                         <input type="email" id="regEmail" placeholder="ваш@email.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="regPassword"><i class="fas fa-lock"></i> Пароль</label>
+                        <label for="regPassword">Пароль</label>
                         <input type="password" id="regPassword" placeholder="Минимум 6 символов" minlength="6" required>
                     </div>
                     <div class="form-group">
-                        <label for="regConfirmPassword"><i class="fas fa-lock"></i> Подтвердите пароль</label>
+                        <label for="regConfirmPassword">Подтвердите пароль</label>
                         <input type="password" id="regConfirmPassword" placeholder="Повторите пароль" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-user-plus"></i> Создать счет
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-block">Создать счет</button>
                 </form>
                 <div class="auth-switch">
                     Уже есть аккаунт? <a href="#" id="switchToLogin">Войти</a>
@@ -82,7 +76,7 @@
     <div class="modal" id="transferModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-exchange-alt"></i> Перевод между пользователями</h3>
+                <h3><i class="fas fa-exchange-alt"></i> Перевод</h3>
                 <button class="modal-close" id="closeTransferModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -94,28 +88,27 @@
                 <form id="transferForm">
                     <div class="tab-content active" id="tab-card">
                         <div class="form-group">
-                            <label for="transferCardNumber"><i class="fas fa-credit-card"></i> Номер карты получателя</label>
-                            <input type="text" id="transferCardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
-                            <div class="input-hint">Введите 16 цифр номера карты</div>
+                            <label for="transferCardNumber">Номер карты получателя</label>
+                            <input type="text" id="transferCardNumber" placeholder="0000 0000 0000 0000" required>
+                            <div class="input-hint">Введите 16 цифр</div>
                         </div>
                     </div>
                     
                     <div class="tab-content" id="tab-email">
                         <div class="form-group">
-                            <label for="transferEmail"><i class="fas fa-envelope"></i> Email получателя</label>
+                            <label for="transferEmail">Email получателя</label>
                             <input type="email" id="transferEmail" placeholder="получатель@email.com">
-                            <div class="input-hint">Будет выполнен перевод на основную карту получателя</div>
+                            <div class="input-hint">Перевод на основную карту получателя</div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="transferAmount"><i class="fas fa-ruble-sign"></i> Сумма перевода (₽)</label>
-                        <input type="number" id="transferAmount" min="1" max="1000000" step="1" 
-                               placeholder="1000" required>
+                        <label for="transferAmount">Сумма (₽)</label>
+                        <input type="number" id="transferAmount" min="1" max="1000000" placeholder="1000" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="transferMessage"><i class="fas fa-comment"></i> Назначение платежа</label>
+                        <label for="transferMessage">Назначение</label>
                         <input type="text" id="transferMessage" placeholder="Например: За услуги">
                     </div>
                     
@@ -130,9 +123,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-paper-plane"></i> Выполнить перевод
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-block">Выполнить перевод</button>
                 </form>
             </div>
         </div>
@@ -141,7 +132,7 @@
     <div class="modal" id="cardModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-credit-card"></i> Выпуск новой карты</h3>
+                <h3><i class="fas fa-credit-card"></i> Выпуск карты</h3>
                 <button class="modal-close" id="closeCardModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -152,7 +143,7 @@
                         </div>
                         <div class="card-option-content">
                             <h4>Дебетовая карта</h4>
-                            <p>Бесплатное обслуживание, кэшбэк 1%</p>
+                            <p>Бесплатно, кэшбэк 1%</p>
                             <div class="card-price">0 ₽/месяц</div>
                         </div>
                     </div>
@@ -163,19 +154,19 @@
                         </div>
                         <div class="card-option-content">
                             <h4>Премиум карта</h4>
-                            <p>Кэшбэк 5%, страховка, приоритетная поддержка</p>
+                            <p>Кэшбэк 5%, приоритет</p>
                             <div class="card-price">499 ₽/месяц</div>
                         </div>
                     </div>
                 </div>
                 
                 <button class="btn btn-primary btn-block" id="issueCardBtn">
-                    <i class="fas fa-check-circle"></i> Выпустить карту
+                    Выпустить карту
                 </button>
                 
                 <div class="card-info">
-                    <p><i class="fas fa-info-circle"></i> Карта будет доставлена в течение 5 рабочих дней</p>
-                    <p><i class="fas fa-shield-alt"></i> Ваши средства застрахованы АСВ</p>
+                    <p><i class="fas fa-info-circle"></i> Доставка за 5 дней</p>
+                    <p><i class="fas fa-shield-alt"></i> Застраховано АСВ</p>
                 </div>
             </div>
         </div>
@@ -196,7 +187,6 @@
                     <a href="#home" class="nav-link active"><i class="fas fa-home"></i> Главная</a>
                     <a href="#clicker" class="nav-link"><i class="fas fa-mouse-pointer"></i> Заработок</a>
                     <a href="#dashboard" class="nav-link dashboard-link"><i class="fas fa-user-circle"></i> Кабинет</a>
-                    <a href="#cards" class="nav-link cards-link"><i class="fas fa-credit-card"></i> Карты</a>
                     <a href="#services" class="nav-link"><i class="fas fa-concierge-bell"></i> Услуги</a>
                 </div>
                 
@@ -215,24 +205,10 @@
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <h1 class="hero-title">Ваши финансы под полным контролем</h1>
-                <p class="hero-subtitle">XYZBank — современный банк с мгновенными переводами, выпуском карт и уникальным кликером для заработка</p>
+                <h1 class="hero-title">Ваши финансы под контролем</h1>
+                <p class="hero-subtitle">XYZBank — современный банк с переводами, картами и заработком</p>
                 <div class="hero-actions" id="heroActions">
                     <!-- Заполняется JavaScript -->
-                </div>
-                <div class="hero-features">
-                    <div class="feature">
-                        <i class="fas fa-bolt"></i>
-                        <span>Мгновенные переводы</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Надежная защита</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-coins"></i>
-                        <span>Заработок в кликере</span>
-                    </div>
                 </div>
             </div>
             <div class="hero-image">
@@ -247,9 +223,6 @@
                             <span class="card-expiry">12/28</span>
                         </div>
                         <div class="card-logo">XYZ</div>
-                        <div class="card-contactless">
-                            <i class="fas fa-wifi"></i>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -259,46 +232,28 @@
     <!-- Clicker Section -->
     <section class="clicker-section" id="clicker">
         <div class="container">
-            <h2 class="section-title"><i class="fas fa-mouse-pointer"></i> Кликер для заработка</h2>
+            <h2 class="section-title">Кликер для заработка</h2>
             <p class="section-subtitle">1 клик = 1 рубль. Зарабатывайте реальные деньги!</p>
             
             <div class="clicker-container" id="clickerContainer">
                 <div class="clicker-game" id="clickerGame">
                     <div class="clicker-stats">
                         <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-wallet"></i>
-                            </div>
                             <div class="stat-content">
                                 <span class="stat-label">Ваш баланс:</span>
                                 <span class="stat-value" id="balance">0 ₽</span>
                             </div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
                             <div class="stat-content">
                                 <span class="stat-label">Всего заработано:</span>
                                 <span class="stat-value" id="totalEarned">0 ₽</span>
                             </div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-calendar-day"></i>
-                            </div>
                             <div class="stat-content">
                                 <span class="stat-label">Кликов сегодня:</span>
                                 <span class="stat-value" id="clicksToday">0/1000</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-label">Множитель:</span>
-                                <span class="stat-value" id="multiplier">1x</span>
                             </div>
                         </div>
                     </div>
@@ -307,104 +262,33 @@
                         <div class="clicker-display">
                             <div class="coin-animation" id="coinAnimation"></div>
                             <button class="clicker-button" id="clickButton">
-                                <div class="clicker-button-inner">
-                                    <i class="fas fa-hand-pointer"></i>
-                                    <span class="click-text">КЛИКАЙ ЗДЕСЬ!</span>
-                                    <span class="click-reward">+1 ₽ за клик</span>
-                                </div>
+                                <i class="fas fa-hand-pointer"></i>
+                                <span class="click-text">КЛИКАЙ ЗДЕСЬ!</span>
+                                <span class="click-reward">+1 ₽ за клик</span>
                             </button>
-                            <div class="clicker-tips">
-                                <p><i class="fas fa-lightbulb"></i> Совет: Покупайте улучшения для увеличения дохода!</p>
-                            </div>
                         </div>
                         
                         <div class="clicker-upgrades">
-                            <h3><i class="fas fa-rocket"></i> Улучшения</h3>
+                            <h3>Улучшения</h3>
                             <div class="upgrades-grid">
                                 <div class="upgrade-item" data-upgrade="auto-clicker">
-                                    <div class="upgrade-icon">
-                                        <i class="fas fa-robot"></i>
-                                    </div>
                                     <div class="upgrade-content">
                                         <h4>Автокликер</h4>
                                         <p>+0.5 руб/сек</p>
                                         <div class="upgrade-action">
                                             <span class="upgrade-cost">1 000 ₽</span>
-                                            <button class="btn btn-sm buy-upgrade">
-                                                <i class="fas fa-shopping-cart"></i> Купить
-                                            </button>
-                                        </div>
-                                        <div class="upgrade-progress">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" id="progress-auto"></div>
-                                            </div>
-                                            <span class="upgrade-level">Уровень: <span id="level-auto">0</span>/10</span>
+                                            <button class="btn btn-sm buy-upgrade">Купить</button>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="upgrade-item" data-upgrade="double-click">
-                                    <div class="upgrade-icon">
-                                        <i class="fas fa-times-circle"></i>
-                                    </div>
                                     <div class="upgrade-content">
                                         <h4>Двойной клик</h4>
                                         <p>×2 за каждый клик</p>
                                         <div class="upgrade-action">
                                             <span class="upgrade-cost">5 000 ₽</span>
-                                            <button class="btn btn-sm buy-upgrade">
-                                                <i class="fas fa-shopping-cart"></i> Купить
-                                            </button>
-                                        </div>
-                                        <div class="upgrade-progress">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" id="progress-double"></div>
-                                            </div>
-                                            <span class="upgrade-level">Уровень: <span id="level-double">0</span>/5</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="upgrade-item" data-upgrade="triple-click">
-                                    <div class="upgrade-icon">
-                                        <i class="fas fa-gem"></i>
-                                    </div>
-                                    <div class="upgrade-content">
-                                        <h4>Тройной клик</h4>
-                                        <p>×3 за каждый клик</p>
-                                        <div class="upgrade-action">
-                                            <span class="upgrade-cost">15 000 ₽</span>
-                                            <button class="btn btn-sm buy-upgrade">
-                                                <i class="fas fa-shopping-cart"></i> Купить
-                                            </button>
-                                        </div>
-                                        <div class="upgrade-progress">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" id="progress-triple"></div>
-                                            </div>
-                                            <span class="upgrade-level">Уровень: <span id="level-triple">0</span>/3</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="upgrade-item" data-upgrade="time-warp">
-                                    <div class="upgrade-icon">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <div class="upgrade-content">
-                                        <h4>Искажение времени</h4>
-                                        <p>×5 за каждый клик</p>
-                                        <div class="upgrade-action">
-                                            <span class="upgrade-cost">50 000 ₽</span>
-                                            <button class="btn btn-sm buy-upgrade">
-                                                <i class="fas fa-shopping-cart"></i> Купить
-                                            </button>
-                                        </div>
-                                        <div class="upgrade-progress">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" id="progress-warp"></div>
-                                            </div>
-                                            <span class="upgrade-level">Уровень: <span id="level-warp">0</span>/2</span>
+                                            <button class="btn btn-sm buy-upgrade">Купить</button>
                                         </div>
                                     </div>
                                 </div>
@@ -415,18 +299,12 @@
                 
                 <div class="clicker-login-prompt" id="loginPrompt">
                     <div class="prompt-content">
-                        <div class="prompt-icon">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <h3>Войдите в систему для использования кликера</h3>
-                        <p>Чтобы начать зарабатывать реальные деньги и сохранять прогресс, войдите или создайте аккаунт</p>
+                        <i class="fas fa-lock"></i>
+                        <h3>Войдите в систему</h3>
+                        <p>Для использования кликера войдите или создайте аккаунт</p>
                         <div class="prompt-actions">
-                            <button class="btn btn-primary" id="promptLoginBtn">
-                                <i class="fas fa-sign-in-alt"></i> Войти
-                            </button>
-                            <button class="btn btn-outline" id="promptRegisterBtn">
-                                <i class="fas fa-user-plus"></i> Регистрация
-                            </button>
+                            <button class="btn btn-primary" id="promptLoginBtn">Войти</button>
+                            <button class="btn btn-outline" id="promptRegisterBtn">Регистрация</button>
                         </div>
                     </div>
                 </div>
@@ -438,18 +316,10 @@
     <section class="dashboard-section" id="dashboard">
         <div class="container">
             <div class="dashboard-header">
-                <h2 class="section-title"><i class="fas fa-user-circle"></i> Личный кабинет</h2>
-                <div class="dashboard-actions">
-                    <button class="btn btn-primary" id="quickTransferBtn">
-                        <i class="fas fa-paper-plane"></i> Быстрый перевод
-                    </button>
-                    <button class="btn btn-outline" id="issueCardBtnMain">
-                        <i class="fas fa-credit-card"></i> Выпустить карту
-                    </button>
-                    <button class="btn btn-secondary" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
-                </div>
+                <h2 class="section-title">Личный кабинет</h2>
+                <button class="btn btn-outline" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
             </div>
             
             <div class="dashboard-content">
@@ -462,158 +332,56 @@
                         <p id="userEmail">demo@xyzbank.ru</p>
                         <div class="user-tier">
                             <span class="tier-badge basic" id="userTier">Базовый</span>
-                            <span class="user-id">ID: <span id="userId">DEMO001</span></span>
                         </div>
                     </div>
                     <div class="user-balance">
-                        <span class="balance-label">Общий баланс:</span>
-                        <span class="balance-amount" id="userBalance">1 000 ₽</span>
-                        <button class="btn btn-sm" id="refreshBalance">
-                            <i class="fas fa-sync-alt"></i> Обновить
-                        </button>
+                        <span class="balance-label">Баланс:</span>
+                        <span class="balance-amount" id="userBalance">10 000 ₽</span>
                     </div>
                 </div>
                 
                 <div class="dashboard-grid">
                     <!-- Мои карты -->
-                    <div class="dashboard-card main-card" id="cards">
+                    <div class="dashboard-card main-card">
                         <div class="card-header">
                             <h3><i class="fas fa-credit-card"></i> Мои карты</h3>
                             <button class="btn btn-sm btn-outline" id="addCardBtn">
-                                <i class="fas fa-plus"></i> Добавить карту
+                                <i class="fas fa-plus"></i> Добавить
                             </button>
                         </div>
                         <div class="cards-list" id="cardsList">
-                            <!-- Карты будут загружены через JavaScript -->
+                            <!-- Карты загружаются через JS -->
                         </div>
                     </div>
                     
                     <!-- Быстрый перевод -->
                     <div class="dashboard-card">
-                        <h3><i class="fas fa-exchange-alt"></i> Быстрый перевод</h3>
+                        <h3><i class="fas fa-exchange-alt"></i> Перевод</h3>
                         <div class="transfer-quick-form">
                             <div class="form-group">
-                                <label for="quickCardNumber"><i class="fas fa-credit-card"></i> Карта получателя</label>
+                                <label for="quickCardNumber">Карта получателя</label>
                                 <input type="text" id="quickCardNumber" placeholder="0000 0000 0000 0000">
                             </div>
                             <div class="form-group">
-                                <label for="quickAmount"><i class="fas fa-ruble-sign"></i> Сумма (₽)</label>
+                                <label for="quickAmount">Сумма (₽)</label>
                                 <input type="number" id="quickAmount" placeholder="1000" min="1">
                             </div>
-                            <button class="btn btn-primary btn-block" id="quickTransferBtn2">
-                                <i class="fas fa-paper-plane"></i> Перевести сейчас
+                            <button class="btn btn-primary btn-block" id="quickTransferBtn">
+                                <i class="fas fa-paper-plane"></i> Перевести
                             </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Статистика -->
-                    <div class="dashboard-card stats-card">
-                        <h3><i class="fas fa-chart-line"></i> Статистика кликера</h3>
-                        <div class="stats-grid">
-                            <div class="stat-box">
-                                <div class="stat-icon">
-                                    <i class="fas fa-coins"></i>
-                                </div>
-                                <div class="stat-value" id="statsTotal">1 000</div>
-                                <div class="stat-label">Всего заработано</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-icon">
-                                    <i class="fas fa-mouse-pointer"></i>
-                                </div>
-                                <div class="stat-value" id="statsClicks">500</div>
-                                <div class="stat-label">Всего кликов</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-icon">
-                                    <i class="fas fa-calendar-day"></i>
-                                </div>
-                                <div class="stat-value" id="statsToday">0</div>
-                                <div class="stat-label">Кликов сегодня</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-icon">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <div class="stat-value" id="statsMultiplier">1x</div>
-                                <div class="stat-label">Множитель</div>
-                            </div>
+                            <button class="btn btn-outline btn-block" id="openTransferModalBtn">
+                                <i class="fas fa-credit-card"></i> Детальный перевод
+                            </button>
                         </div>
                     </div>
                     
                     <!-- История операций -->
                     <div class="dashboard-card history-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-history"></i> История операций</h3>
-                            <button class="btn btn-sm btn-outline" id="clearHistory">
-                                <i class="fas fa-trash"></i> Очистить
-                            </button>
-                        </div>
+                        <h3><i class="fas fa-history"></i> История</h3>
                         <div class="history-list" id="historyList">
-                            <!-- История будет загружена через JavaScript -->
+                            <!-- История загружается через JS -->
                         </div>
                     </div>
-                    
-                    <!-- Пользователи системы -->
-                    <div class="dashboard-card users-card">
-                        <h3><i class="fas fa-users"></i> Пользователи системы</h3>
-                        <div class="users-list" id="usersList">
-                            <!-- Список пользователей будет загружен через JavaScript -->
-                        </div>
-                        <div class="users-stats">
-                            <div class="users-stat">
-                                <span class="stat-label">Всего пользователей:</span>
-                                <span class="stat-value" id="totalUsers">1</span>
-                            </div>
-                            <div class="users-stat">
-                                <span class="stat-label">Общий баланс системы:</span>
-                                <span class="stat-value" id="totalBalance">1 000 ₽</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services-section" id="services">
-        <div class="container">
-            <h2 class="section-title"><i class="fas fa-concierge-bell"></i> Наши услуги</h2>
-            <p class="section-subtitle">Полный спектр банковских услуг для комфортного управления финансами</p>
-            
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-credit-card"></i>
-                    </div>
-                    <h3>Выпуск карт</h3>
-                    <p>Дебетовые и премиум карты с мгновенным выпуском и доставкой</p>
-                    <button class="btn btn-sm btn-outline service-btn" data-service="card">Подробнее</button>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <h3>Мгновенные переводы</h3>
-                    <p>Переводы между пользователями по карте или email без комиссии</p>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-piggy-bank"></i>
-                    </div>
-                    <h3>Вклады</h3>
-                    <p>Высокие процентные ставки по вкладам с ежемесячной капитализацией</p>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Инвестиции</h3>
-                    <p>Доверительное управление и индивидуальные стратегии</p>
                 </div>
             </div>
         </div>
@@ -630,51 +398,58 @@
                         </div>
                         <span class="logo-text">XYZBank</span>
                     </a>
-                    <p class="footer-description">Современный банк с инновационными решениями для управления финансами</p>
+                    <p class="footer-description">Современный банк с инновационными решениями</p>
                     <div class="social-links">
-                        <a href="#" title="ВКонтакте"><i class="fab fa-vk"></i></a>
-                        <a href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
-                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 
                 <div class="footer-section">
-                    <h4><i class="fas fa-headset"></i> Поддержка</h4>
+                    <h4>Контакты</h4>
                     <ul class="footer-links">
                         <li><i class="fas fa-phone"></i> 8 (800) 555-35-35</li>
-                        <li><i class="fas fa-envelope"></i> support@xyzbank.ru</li>
-                        <li><i class="fas fa-comments"></i> Чат 24/7</li>
+                        <li><i class="fas fa-envelope"></i> info@xyzbank.ru</li>
                         <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Банковская, 1</li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h4><i class="fas fa-link"></i> Быстрые ссылки</h4>
-                    <ul class="footer-links">
-                        <li><a href="#home"><i class="fas fa-home"></i> Главная</a></li>
-                        <li><a href="#clicker"><i class="fas fa-mouse-pointer"></i> Кликер</a></li>
-                        <li><a href="#dashboard"><i class="fas fa-user-circle"></i> Кабинет</a></li>
-                        <li><a href="#cards"><i class="fas fa-credit-card"></i> Карты</a></li>
-                    </ul>
+                    <h4>Статистика</h4>
+                    <div class="stats-container">
+                        <div class="stat-item-footer">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <span class="stat-value-footer" id="totalUsersFooter">1</span>
+                                <span class="stat-label-footer">Пользователей</span>
+                            </div>
+                        </div>
+                        <div class="stat-item-footer">
+                            <i class="fas fa-credit-card"></i>
+                            <div>
+                                <span class="stat-value-footer" id="totalCardsFooter">1</span>
+                                <span class="stat-label-footer">Карт</span>
+                            </div>
+                        </div>
+                        <div class="stat-item-footer">
+                            <i class="fas fa-exchange-alt"></i>
+                            <div>
+                                <span class="stat-value-footer" id="totalTransactionsFooter">0</span>
+                                <span class="stat-label-footer">Переводов</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="footer-bottom">
                 <div class="footer-copyright">
-                    <i class="far fa-copyright"></i> 2024 XYZBank. Лицензия ЦБ РФ № 1234
-                </div>
-                <div class="footer-legal">
-                    <a href="#"><i class="fas fa-shield-alt"></i> Безопасность</a>
-                    <a href="#"><i class="fas fa-file-contract"></i> Договор</a>
-                    <a href="#"><i class="fas fa-user-lock"></i> Конфиденциальность</a>
+                    © 2024 XYZBank. Лицензия ЦБ РФ № 1234
                 </div>
             </div>
         </div>
     </footer>
-
-    <!-- Notification Container -->
-    <div id="notificationContainer"></div>
 
     <script src="script.js"></script>
 </body>
