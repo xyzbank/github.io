@@ -1,40 +1,79 @@
-// Система пользователей и кликера для XYZBank
+// Система банка XYZBank с кликером и переводами
 
 // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
 let currentUser = null;
 let users = JSON.parse(localStorage.getItem('xyzbank_users')) || [];
-let clickerData = JSON.parse(localStorage.getItem('xyzbank_clicker')) || {};
+let transactions = JSON.parse(localStorage.getItem('xyzbank_transactions')) || [];
 let autoClickerInterval = null;
 
 // Демо-пользователь по умолчанию
 const DEMO_USER = {
+    id: 'demo_001',
     email: 'demo@xyzbank.ru',
     password: 'demo123',
     name: 'Демо Пользователь',
-    createdAt: new Date().toISOString()
+    balance: 1000,
+    totalEarned: 1000,
+    clicks: 500,
+    clicksToday: 0,
+    lastClickDate: new Date().toDateString(),
+    upgrades: {
+        autoClicker: { level: 0, rate: 0 },
+        doubleClick: { level: 0, multiplier: 1 },
+        tripleClick: { level: 0, multiplier: 1 },
+        timeWarp: { level: 0, multiplier: 1 }
+    },
+    cardNumber: '4567 8912 3456 7890',
+    createdAt: new Date().toISOString(),
+    tier: 'basic'
 };
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 document.addEventListener('DOMContentLoaded', function() {
     initApp();
-    loadClickerData();
-    updateUI();
     setupEventListeners();
-    checkAutoClicker();
+    updateUI();
 });
 
-// ==================== СИСТЕМА ПОЛЬЗОВАТЕЛЕЙ ====================
 function initApp() {
     // Добавляем демо-пользователя если его нет
     if (!users.find(u => u.email === DEMO_USER.email)) {
-        users.push({
-            ...DEMO_USER,
-            balance: 1000,
-            totalEarned: 1000,
-            clicks: 500,
-            lastLogin: new Date().toISOString()
-        });
+        users.push(DEMO_USER);
         saveUsers();
+    }
+    
+    // Загружаем транзакции если нет
+    if (transactions.length === 0) {
+        transactions = [
+            {
+                id: 'trans_001',
+                userId: 'demo_001',
+                type: 'clicker',
+                amount: 50,
+                description: 'Заработок в кликере',
+                date: new Date().toISOString(),
+                status: 'completed'
+            },
+            {
+                id: 'trans_002',
+                userId: 'demo_001',
+                type: 'transfer',
+                amount: -1000,
+                description: 'Перевод на карту **** 1234',
+                date: new Date(Date.now() - 86400000).toISOString(), // Вчера
+                status: 'completed'
+            },
+            {
+                id: 'trans_003',
+                userId: 'demo_001',
+                type: 'interest',
+                amount: 250,
+                description: 'Начисление процентов',
+                date: new Date(Date.now() - 172800000).toISOString(), // Позавчера
+                status: 'completed'
+            }
+        ];
+        saveTransactions();
     }
     
     // Проверяем авторизацию
@@ -51,6 +90,11 @@ function saveUsers() {
     localStorage.setItem('xyzbank_users', JSON.stringify(users));
 }
 
+function saveTransactions() {
+    localStorage.setItem('xyzbank_transactions', JSON.stringify(transactions));
+}
+
+// ==================== СИСТЕМА АВТОРИЗАЦИИ ====================
 function loginUser(user) {
     currentUser = user;
     localStorage.setItem('xyzbank_currentUser', user.email);
@@ -62,30 +106,21 @@ function loginUser(user) {
     updateUI();
     showNotification(`Добро пожаловать, ${user.name}!`, 'success');
     
-    // Загружаем данные кликера для пользователя
-    loadClickerData();
-    
-    // Показываем личный кабинет
-    showDashboard();
+    // Запускаем автокликер если есть улучшения
+    startAutoClicker();
 }
 
 function logout() {
-    // Сохраняем данные кликера перед выходом
-    saveClickerData();
-    
-    currentUser = null;
-    localStorage.removeItem('xyzbank_currentUser');
-    updateUI();
-    showNotification('Вы вышли из системы', 'info');
-    
     // Останавливаем автокликер
     if (autoClickerInterval) {
         clearInterval(autoClickerInterval);
         autoClickerInterval = null;
     }
     
-    // Показываем главную страницу
-    showHomepage();
+    currentUser = null;
+    localStorage.removeItem('xyzbank_currentUser');
+    updateUI();
+    showNotification('Вы вышли из системы', 'info');
 }
 
 function registerUser(name, email, password) {
@@ -97,125 +132,105 @@ function registerUser(name, email, password) {
     
     // Создаем нового пользователя
     const newUser = {
+        id: 'user_' + Date.now(),
         email,
         password,
         name,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        balance: 100, // Начальный бонус
+        balance: 100,
         totalEarned: 100,
         clicks: 0,
-        tier: 'basic',
-        phone: ''
+        clicksToday: 0,
+        lastClickDate: new Date().toDateString(),
+        upgrades: {
+            autoClicker: { level: 0, rate: 0 },
+            doubleClick: { level: 0, multiplier: 1 },
+            tripleClick: { level: 0, multiplier: 1 },
+            timeWarp: { level: 0, multiplier: 1 }
+        },
+        cardNumber: generateCardNumber(),
+        createdAt: new Date().toISOString(),
+        tier: 'basic'
     };
     
     users.push(newUser);
     saveUsers();
     loginUser(newUser);
     
-    // Инициализируем данные кликера для нового пользователя
-    initClickerData();
+    // Добавляем начальную транзакцию
+    transactions.push({
+        id: 'trans_' + Date.now(),
+        userId: newUser.id,
+        type: 'bonus',
+        amount: 100,
+        description: 'Регистрационный бонус',
+        date: new Date().toISOString(),
+        status: 'completed'
+    });
+    saveTransactions();
     
     showNotification('Аккаунт успешно создан! Получен бонус 100 рублей!', 'success');
     return true;
 }
 
+function generateCardNumber() {
+    // Генерируем случайный номер карты
+    let cardNumber = '';
+    for (let i = 0; i < 16; i++) {
+        cardNumber += Math.floor(Math.random() * 10);
+        if ((i + 1) % 4 === 0 && i !== 15) {
+            cardNumber += ' ';
+        }
+    }
+    return cardNumber;
+}
+
 // ==================== КЛИКЕР ====================
-function initClickerData() {
-    if (!currentUser) return;
-    
-    const userId = currentUser.email;
-    if (!clickerData[userId]) {
-        clickerData[userId] = {
-            balance: currentUser.balance || 100,
-            totalEarned: currentUser.totalEarned || 100,
-            clicks: currentUser.clicks || 0,
-            clicksToday: 0,
-            lastClickDate: new Date().toDateString(),
-            upgrades: {
-                autoClicker: { level: 0, rate: 0 },
-                doubleClick: { level: 0, multiplier: 1 },
-                tripleClick: { level: 0, multiplier: 1 },
-                timeWarp: { level: 0, multiplier: 1 }
-            },
-            achievements: {},
-            clickHistory: [],
-            autoClickerActive: false
-        };
-        saveClickerData();
-    }
-}
-
-function loadClickerData() {
-    if (!currentUser) return;
-    
-    const userId = currentUser.email;
-    initClickerData(); // Создает если не существует
-    
-    // Проверяем, новый ли день
-    const today = new Date().toDateString();
-    if (clickerData[userId].lastClickDate !== today) {
-        clickerData[userId].clicksToday = 0;
-        clickerData[userId].lastClickDate = today;
-        saveClickerData();
-    }
-    
-    updateClickerUI();
-}
-
-function saveClickerData() {
-    localStorage.setItem('xyzbank_clicker', JSON.stringify(clickerData));
-}
-
 function handleClick() {
     if (!currentUser) {
         showLoginModal();
         return;
     }
     
-    const userId = currentUser.email;
-    const data = clickerData[userId];
+    // Проверяем, новый ли день
+    const today = new Date().toDateString();
+    if (currentUser.lastClickDate !== today) {
+        currentUser.clicksToday = 0;
+        currentUser.lastClickDate = today;
+    }
     
     // Проверяем лимит на день (1000 кликов)
-    if (data.clicksToday >= 1000) {
+    if (currentUser.clicksToday >= 1000) {
         showNotification('Достигнут дневной лимит кликов (1000)', 'warning');
         return;
     }
     
     // Вычисляем доход за клик
     const baseEarning = 1;
-    const multiplier = data.upgrades.doubleClick.multiplier * 
-                      data.upgrades.tripleClick.multiplier * 
-                      data.upgrades.timeWarp.multiplier;
+    const multiplier = currentUser.upgrades.doubleClick.multiplier * 
+                      currentUser.upgrades.tripleClick.multiplier * 
+                      currentUser.upgrades.timeWarp.multiplier;
     const earnings = baseEarning * multiplier;
     
-    // Обновляем данные
-    data.balance += earnings;
-    data.totalEarned += earnings;
-    data.clicks += 1;
-    data.clicksToday += 1;
-    currentUser.balance = data.balance;
-    currentUser.totalEarned = data.totalEarned;
-    currentUser.clicks = data.clicks;
+    // Обновляем данные пользователя
+    currentUser.balance += earnings;
+    currentUser.totalEarned += earnings;
+    currentUser.clicks += 1;
+    currentUser.clicksToday += 1;
     
-    // Добавляем в историю
-    data.clickHistory.push({
+    // Добавляем транзакцию
+    transactions.push({
+        id: 'trans_' + Date.now(),
+        userId: currentUser.id,
+        type: 'clicker',
         amount: earnings,
-        timestamp: new Date().toISOString(),
-        multiplier: multiplier
+        description: 'Заработок в кликере',
+        date: new Date().toISOString(),
+        status: 'completed'
     });
     
-    // Ограничиваем историю последними 50 записями
-    if (data.clickHistory.length > 50) {
-        data.clickHistory = data.clickHistory.slice(-50);
-    }
-    
-    // Проверяем достижения
-    checkAchievements();
-    
-    // Сохраняем
+    // Сохраняем данные
     saveUsers();
-    saveClickerData();
+    saveTransactions();
     
     // Обновляем UI
     updateClickerUI();
@@ -224,16 +239,14 @@ function handleClick() {
     // Анимация
     createCoinAnimation(earnings);
     
-    // Звуковой эффект (опционально)
+    // Звуковой эффект
     playClickSound();
 }
 
 function buyUpgrade(upgradeType) {
     if (!currentUser) return;
     
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    const upgrade = data.upgrades[upgradeType];
+    const upgrade = currentUser.upgrades[upgradeType];
     
     // Определяем стоимость улучшения
     const costs = {
@@ -245,10 +258,9 @@ function buyUpgrade(upgradeType) {
     
     const cost = costs[upgradeType];
     
-    if (data.balance >= cost) {
+    if (currentUser.balance >= cost) {
         // Покупаем улучшение
-        data.balance -= cost;
-        currentUser.balance = data.balance;
+        currentUser.balance -= cost;
         upgrade.level += 1;
         
         // Применяем эффект улучшения
@@ -268,9 +280,20 @@ function buyUpgrade(upgradeType) {
                 break;
         }
         
+        // Добавляем транзакцию
+        transactions.push({
+            id: 'trans_' + Date.now(),
+            userId: currentUser.id,
+            type: 'upgrade',
+            amount: -cost,
+            description: `Покупка улучшения: ${getUpgradeName(upgradeType)}`,
+            date: new Date().toISOString(),
+            status: 'completed'
+        });
+        
         // Сохраняем
         saveUsers();
-        saveClickerData();
+        saveTransactions();
         
         // Обновляем UI
         updateClickerUI();
@@ -293,33 +316,31 @@ function getUpgradeName(type) {
 }
 
 function startAutoClicker() {
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    
     if (autoClickerInterval) {
         clearInterval(autoClickerInterval);
     }
     
-    if (data.upgrades.autoClicker.level > 0) {
+    if (currentUser && currentUser.upgrades.autoClicker.level > 0) {
         autoClickerInterval = setInterval(() => {
-            if (currentUser && data.clicksToday < 1000) {
+            if (currentUser && currentUser.clicksToday < 1000) {
                 // Автоклик работает в фоне
-                const earnings = data.upgrades.autoClicker.rate;
-                data.balance += earnings;
-                data.totalEarned += earnings;
-                currentUser.balance = data.balance;
-                currentUser.totalEarned = data.totalEarned;
+                const earnings = currentUser.upgrades.autoClicker.rate;
+                currentUser.balance += earnings;
+                currentUser.totalEarned += earnings;
                 
-                // Добавляем в историю
-                data.clickHistory.push({
+                // Добавляем транзакцию
+                transactions.push({
+                    id: 'trans_' + Date.now(),
+                    userId: currentUser.id,
+                    type: 'auto-clicker',
                     amount: earnings,
-                    timestamp: new Date().toISOString(),
-                    multiplier: 1,
-                    auto: true
+                    description: 'Автокликер',
+                    date: new Date().toISOString(),
+                    status: 'completed'
                 });
                 
                 saveUsers();
-                saveClickerData();
+                saveTransactions();
                 updateClickerUI();
                 updateDashboard();
             }
@@ -327,139 +348,169 @@ function startAutoClicker() {
     }
 }
 
-function checkAutoClicker() {
-    if (currentUser && clickerData[currentUser.email]?.upgrades?.autoClicker?.level > 0) {
-        startAutoClicker();
+// ==================== СИСТЕМА ПЕРЕВОДОВ ====================
+function transferMoney(cardNumber, amount, description = '') {
+    if (!currentUser) {
+        showNotification('Войдите в систему для выполнения перевода', 'error');
+        return false;
     }
-}
-
-function checkAchievements() {
-    if (!currentUser) return;
     
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    const achievements = document.querySelectorAll('.achievement');
+    if (!cardNumber || cardNumber.replace(/\s/g, '').length !== 16) {
+        showNotification('Введите корректный номер карты (16 цифр)', 'error');
+        return false;
+    }
     
-    achievements.forEach(achievement => {
-        const requirement = parseInt(achievement.dataset.requirement);
-        const reward = parseInt(achievement.dataset.reward);
-        const status = achievement.querySelector('.achievement-status');
-        
-        if (!data.achievements[requirement] && data.totalEarned >= requirement) {
-            // Разблокируем достижение
-            data.achievements[requirement] = true;
-            data.balance += reward;
-            currentUser.balance = data.balance;
-            
-            // Обновляем UI
-            achievement.classList.add('unlocked');
-            status.textContent = 'Получено!';
-            status.dataset.status = 'unlocked';
-            
-            // Уведомление
-            showNotification(`Достижение разблокировано! +${reward} рублей`, 'success');
-            
-            saveUsers();
-            saveClickerData();
-            updateClickerUI();
+    if (!amount || amount <= 0) {
+        showNotification('Введите корректную сумму', 'error');
+        return false;
+    }
+    
+    if (currentUser.balance < amount) {
+        showNotification('Недостаточно средств на счете', 'error');
+        return false;
+    }
+    
+    // Рассчитываем комиссию (1% но не менее 10 рублей)
+    const commission = Math.max(10, amount * 0.01);
+    const total = amount + commission;
+    
+    if (currentUser.balance < total) {
+        showNotification(`Недостаточно средств с учетом комиссии ${commission} ₽`, 'error');
+        return false;
+    }
+    
+    // Выполняем перевод
+    currentUser.balance -= total;
+    
+    // Добавляем транзакцию
+    transactions.push({
+        id: 'trans_' + Date.now(),
+        userId: currentUser.id,
+        type: 'transfer',
+        amount: -amount,
+        description: description || `Перевод на карту **** ${cardNumber.slice(-4)}`,
+        date: new Date().toISOString(),
+        status: 'completed',
+        details: {
+            toCard: cardNumber,
+            commission: commission
         }
     });
+    
+    // Сохраняем
+    saveUsers();
+    saveTransactions();
+    
+    // Обновляем UI
+    updateDashboard();
+    updateUI();
+    
+    showNotification(`Перевод ${formatCurrency(amount)} выполнен успешно! Комиссия: ${formatCurrency(commission)}`, 'success');
+    return true;
 }
 
 // ==================== UI ОБНОВЛЕНИЯ ====================
 function updateUI() {
     const navActions = document.getElementById('navActions');
     const heroActions = document.getElementById('heroActions');
-    const loginPrompt = document.getElementById('loginPrompt');
     const clickerGame = document.getElementById('clickerGame');
+    const loginPrompt = document.getElementById('loginPrompt');
+    const dashboardSection = document.getElementById('dashboard');
+    const navMenu = document.getElementById('navMenu');
     
     if (currentUser) {
         // Пользователь авторизован
         navActions.innerHTML = `
-            <div class="user-balance">
+            <div class="user-balance-nav">
                 <i class="fas fa-wallet"></i>
-                <span id="navBalance">${formatCurrency(currentUser.balance)}</span>
+                <span>${formatCurrency(currentUser.balance)}</span>
             </div>
-            <div class="user-menu">
-                <button class="btn btn-outline" id="userMenuBtn">
-                    <i class="fas fa-user-circle"></i>
-                    ${currentUser.name.split(' ')[0]}
-                </button>
-                <div class="dropdown-menu" id="userDropdown">
-                    <a href="#dashboard" class="dropdown-item">
-                        <i class="fas fa-tachometer-alt"></i> Личный кабинет
-                    </a>
-                    <a href="#clicker" class="dropdown-item">
-                        <i class="fas fa-mouse-pointer"></i> Кликер
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
-                </div>
-            </div>
+            <button class="btn btn-outline" id="userLogoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </button>
         `;
         
         heroActions.innerHTML = `
-            <a href="#clicker" class="btn btn-primary btn-large">
+            <button class="btn btn-primary btn-large" onclick="document.getElementById('clicker').scrollIntoView()">
                 <i class="fas fa-mouse-pointer"></i> Начать зарабатывать
-            </a>
-            <a href="#dashboard" class="btn btn-secondary btn-large">
+            </button>
+            <button class="btn btn-secondary btn-large" onclick="showDashboardSection()">
                 <i class="fas fa-chart-line"></i> Личный кабинет
-            </a>
+            </button>
         `;
         
-        if (loginPrompt) loginPrompt.style.display = 'none';
         if (clickerGame) clickerGame.style.display = 'block';
+        if (loginPrompt) loginPrompt.style.display = 'none';
+        if (dashboardSection) dashboardSection.style.display = 'none';
         
-        setupUserMenu();
+        // Обновляем навигацию
+        if (navMenu) {
+            const dashboardLink = navMenu.querySelector('.dashboard-link');
+            if (dashboardLink) {
+                dashboardLink.style.display = 'block';
+            }
+        }
+        
+        // Добавляем обработчик выхода
+        document.getElementById('userLogoutBtn')?.addEventListener('click', logout);
+        
+        // Обновляем данные кликера
+        updateClickerUI();
     } else {
         // Пользователь не авторизован
         navActions.innerHTML = `
-            <button class="btn btn-outline" id="loginBtn">Вход</button>
-            <button class="btn btn-primary" id="registerBtn">Открыть счет</button>
+            <button class="btn btn-outline" id="navLoginBtn">Вход</button>
+            <button class="btn btn-primary" id="navRegisterBtn">Открыть счет</button>
         `;
         
         heroActions.innerHTML = `
-            <button class="btn btn-primary btn-large" id="mainLoginBtn">
+            <button class="btn btn-primary btn-large" id="heroLoginBtn">
                 <i class="fas fa-sign-in-alt"></i> Войти в систему
             </button>
-            <button class="btn btn-secondary btn-large" id="mainRegisterBtn">
+            <button class="btn btn-secondary btn-large" id="heroRegisterBtn">
                 <i class="fas fa-user-plus"></i> Создать аккаунт
             </button>
         `;
         
-        if (loginPrompt) loginPrompt.style.display = 'flex';
         if (clickerGame) clickerGame.style.display = 'none';
+        if (loginPrompt) loginPrompt.style.display = 'flex';
+        if (dashboardSection) dashboardSection.style.display = 'none';
+        
+        // Обновляем навигацию
+        if (navMenu) {
+            const dashboardLink = navMenu.querySelector('.dashboard-link');
+            if (dashboardLink) {
+                dashboardLink.style.display = 'none';
+            }
+        }
+        
+        // Добавляем обработчики для кнопок входа/регистрации
+        document.getElementById('navLoginBtn')?.addEventListener('click', showLoginModal);
+        document.getElementById('navRegisterBtn')?.addEventListener('click', showRegisterModal);
+        document.getElementById('heroLoginBtn')?.addEventListener('click', showLoginModal);
+        document.getElementById('heroRegisterBtn')?.addEventListener('click', showRegisterModal);
     }
 }
 
 function updateClickerUI() {
     if (!currentUser) return;
     
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    
     // Обновляем статистику
-    document.getElementById('balance').textContent = formatCurrency(data.balance);
-    document.getElementById('totalEarned').textContent = formatCurrency(data.totalEarned);
-    document.getElementById('clicksToday').textContent = data.clicksToday;
-    document.getElementById('maxPerDay').textContent = '1000';
+    document.getElementById('balance').textContent = formatCurrency(currentUser.balance);
+    document.getElementById('totalEarned').textContent = formatCurrency(currentUser.totalEarned);
+    document.getElementById('clicksToday').textContent = currentUser.clicksToday;
     
     // Вычисляем множитель
-    const multiplier = data.upgrades.doubleClick.multiplier * 
-                      data.upgrades.tripleClick.multiplier * 
-                      data.upgrades.timeWarp.multiplier;
+    const multiplier = currentUser.upgrades.doubleClick.multiplier * 
+                      currentUser.upgrades.tripleClick.multiplier * 
+                      currentUser.upgrades.timeWarp.multiplier;
     document.getElementById('multiplier').textContent = `${multiplier}x`;
     
     // Обновляем улучшения
-    updateUpgradeUI('auto-clicker', data.upgrades.autoClicker);
-    updateUpgradeUI('double-click', data.upgrades.doubleClick);
-    updateUpgradeUI('triple-click', data.upgrades.tripleClick);
-    updateUpgradeUI('time-warp', data.upgrades.timeWarp);
-    
-    // Обновляем достижения
-    updateAchievementsUI();
+    updateUpgradeUI('auto-clicker', currentUser.upgrades.autoClicker);
+    updateUpgradeUI('double-click', currentUser.upgrades.doubleClick);
+    updateUpgradeUI('triple-click', currentUser.upgrades.tripleClick);
+    updateUpgradeUI('time-warp', currentUser.upgrades.timeWarp);
 }
 
 function updateUpgradeUI(type, upgrade) {
@@ -486,155 +537,78 @@ function updateUpgradeUI(type, upgrade) {
         const upgradeElement = document.querySelector(`[data-upgrade="${type}"]`);
         if (upgradeElement) {
             const costElement = upgradeElement.querySelector('.upgrade-cost');
+            const button = upgradeElement.querySelector('.buy-upgrade');
+            
             if (costElement) {
                 costElement.textContent = `${formatCurrency(cost)}`;
             }
             
-            // Блокируем кнопку если максимальный уровень
-            const button = upgradeElement.querySelector('button');
             if (button) {
                 if (upgrade.level >= 10) {
                     button.textContent = 'Макс. ур.';
                     button.disabled = true;
-                    button.classList.add('disabled');
+                    button.style.opacity = '0.5';
                 } else {
                     button.textContent = 'Купить';
                     button.disabled = false;
-                    button.classList.remove('disabled');
+                    button.style.opacity = '1';
                 }
             }
         }
     }
 }
 
-function updateAchievementsUI() {
-    if (!currentUser) return;
-    
-    const data = clickerData[currentUser.email];
-    const achievements = document.querySelectorAll('.achievement');
-    
-    achievements.forEach(achievement => {
-        const requirement = parseInt(achievement.dataset.requirement);
-        const status = achievement.querySelector('.achievement-status');
-        
-        if (data.achievements[requirement]) {
-            achievement.classList.add('unlocked');
-            status.textContent = 'Получено!';
-            status.dataset.status = 'unlocked';
-        } else if (data.totalEarned >= requirement) {
-            achievement.classList.add('unlocked');
-            status.textContent = 'Получить награду';
-            status.dataset.status = 'unlocked';
-            status.style.cursor = 'pointer';
-            status.onclick = () => claimAchievement(requirement);
-        }
-    });
-}
-
-function claimAchievement(requirement) {
-    if (!currentUser) return;
-    
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    const reward = parseInt(document.querySelector(`[data-requirement="${requirement}"]`).dataset.reward);
-    
-    if (!data.achievements[requirement] && data.totalEarned >= requirement) {
-        data.achievements[requirement] = true;
-        data.balance += reward;
-        currentUser.balance = data.balance;
-        
-        saveUsers();
-        saveClickerData();
-        updateClickerUI();
-        updateDashboard();
-        
-        showNotification(`Достижение получено! +${reward} рублей`, 'success');
-    }
-}
-
-// ==================== ЛИЧНЫЙ КАБИНЕТ ====================
-function showDashboard() {
-    document.getElementById('dashboard').style.display = 'block';
-    document.querySelector('.clicker-section').style.display = 'none';
-    document.querySelector('.services').style.display = 'none';
-    document.querySelector('.advantages').style.display = 'none';
-    document.querySelector('.tariffs').style.display = 'none';
-    updateDashboard();
-}
-
-function showHomepage() {
-    document.getElementById('dashboard').style.display = 'none';
-    document.querySelector('.clicker-section').style.display = 'block';
-    document.querySelector('.services').style.display = 'block';
-    document.querySelector('.advantages').style.display = 'block';
-    document.querySelector('.tariffs').style.display = 'block';
-}
-
 function updateDashboard() {
     if (!currentUser) return;
     
-    const userId = currentUser.email;
-    const data = clickerData[userId];
-    
-    // Обновляем общую информацию
+    // Обновляем информацию пользователя
     document.getElementById('userName').textContent = currentUser.name;
     document.getElementById('userEmail').textContent = currentUser.email;
-    document.getElementById('overviewBalance').textContent = formatCurrency(currentUser.balance);
-    document.getElementById('overviewClicker').textContent = formatCurrency(data.totalEarned);
-    document.getElementById('overviewClicks').textContent = data.clicks;
-    document.getElementById('overviewLevel').textContent = calculateLevel(data.totalEarned);
+    document.getElementById('userBalance').textContent = formatCurrency(currentUser.balance);
+    document.getElementById('mainCardBalance').textContent = formatCurrency(currentUser.balance);
     
-    // Обновляем счета
-    document.getElementById('mainAccountBalance').textContent = formatCurrency(currentUser.balance);
-    document.getElementById('savingsBalance').textContent = formatCurrency(Math.floor(currentUser.balance * 0.3));
+    // Обновляем статистику кликера
+    document.getElementById('statsTotal').textContent = formatCurrency(currentUser.totalEarned);
+    document.getElementById('statsClicks').textContent = currentUser.clicks;
+    document.getElementById('statsToday').textContent = currentUser.clicksToday;
     
-    // Детальная статистика кликера
-    document.getElementById('detailedTotal').textContent = formatCurrency(data.totalEarned);
-    document.getElementById('detailedClicks').textContent = data.clicks;
-    document.getElementById('detailedAvg').textContent = formatCurrency(data.clicks > 0 ? data.totalEarned / data.clicks : 0);
-    document.getElementById('detailedMaxDay').textContent = formatCurrency(Math.max(...data.clickHistory.filter(h => !h.auto).map(h => h.amount) || [0]));
-    document.getElementById('detailedAuto').textContent = data.upgrades.autoClicker.level;
-    document.getElementById('detailedUpgrades').textContent = Object.values(data.upgrades).reduce((sum, u) => sum + u.level, 0);
+    const multiplier = currentUser.upgrades.doubleClick.multiplier * 
+                      currentUser.upgrades.tripleClick.multiplier * 
+                      currentUser.upgrades.timeWarp.multiplier;
+    document.getElementById('statsMultiplier').textContent = `${multiplier}x`;
     
-    // Обновляем последние операции
-    updateActivityList();
-    
-    // Обновляем настройки
-    document.getElementById('settingsName').value = currentUser.name;
-    document.getElementById('settingsEmail').value = currentUser.email;
-    document.getElementById('settingsPhone').value = currentUser.phone || '';
+    // Обновляем историю операций
+    updateHistoryList();
 }
 
-function calculateLevel(totalEarned) {
-    return Math.floor(Math.log10(totalEarned + 1)) + 1;
-}
-
-function updateActivityList() {
+function updateHistoryList() {
     if (!currentUser) return;
     
-    const data = clickerData[currentUser.email];
-    const activityList = document.getElementById('activityList');
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
     
-    if (!activityList) return;
+    // Получаем последние 5 транзакций пользователя
+    const userTransactions = transactions
+        .filter(t => t.userId === currentUser.id)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
     
-    // Берем последние 5 операций
-    const recentActivities = data.clickHistory.slice(-5).reverse();
+    if (userTransactions.length === 0) {
+        historyList.innerHTML = '<p class="no-history">Нет операций</p>';
+        return;
+    }
     
-    activityList.innerHTML = recentActivities.map(activity => `
-        <div class="activity-item">
-            <div class="activity-info">
-                <h4>${activity.auto ? 'Автокликер' : 'Клик'}</h4>
-                <p>${new Date(activity.timestamp).toLocaleString()}</p>
+    historyList.innerHTML = userTransactions.map(transaction => `
+        <div class="history-item">
+            <div class="history-info">
+                <div class="history-title">${transaction.description}</div>
+                <div class="history-date">${formatDate(transaction.date)}</div>
             </div>
-            <div class="activity-amount positive">
-                +${formatCurrency(activity.amount)}
+            <div class="history-amount ${transaction.amount > 0 ? 'positive' : 'negative'}">
+                ${transaction.amount > 0 ? '+' : ''}${formatCurrency(transaction.amount)}
             </div>
         </div>
     `).join('');
-    
-    if (recentActivities.length === 0) {
-        activityList.innerHTML = '<p class="no-activities">Нет операций</p>';
-    }
 }
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
@@ -643,11 +617,29 @@ function formatCurrency(amount) {
         style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-    }).format(amount) + ' ₽';
+    }).format(Math.abs(amount)) + ' ₽';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 86400000) { // Менее суток
+        return 'Сегодня, ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    } else if (diff < 172800000) { // Менее двух суток
+        return 'Вчера, ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    } else {
+        return date.toLocaleDateString('ru-RU') + ', ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    }
 }
 
 function showNotification(message, type = 'info') {
-    // Создаем уведомление
+    // Удаляем старые уведомления
+    const oldNotifications = document.querySelectorAll('.notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    // Создаем новое уведомление
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -658,66 +650,33 @@ function showNotification(message, type = 'info') {
         <button class="notification-close">&times;</button>
     `;
     
-    // Добавляем стили
-    const style = document.createElement('style');
-    style.textContent = `
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            min-width: 300px;
-            max-width: 400px;
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            border-left: 4px solid #0052cc;
-        }
-        .notification-success { border-left-color: #36b37e; }
-        .notification-error { border-left-color: #ff6b6b; }
-        .notification-warning { border-left-color: #ffab00; }
-        .notification-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .notification-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #666;
-            cursor: pointer;
-            line-height: 1;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
-    
     document.body.appendChild(notification);
+    
+    // Анимация появления
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+    }, 10);
     
     // Удаляем уведомление через 5 секунд
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease forwards';
+        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '0';
         setTimeout(() => notification.remove(), 300);
     }, 5000);
     
     // Закрытие по клику
     notification.querySelector('.notification-close').addEventListener('click', () => {
-        notification.remove();
+        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
     });
 }
 
 function createCoinAnimation(amount) {
     const container = document.getElementById('coinAnimation');
+    if (!container) return;
+    
     const coin = document.createElement('div');
     coin.className = 'coin';
     coin.textContent = `+${amount}`;
@@ -732,7 +691,6 @@ function createCoinAnimation(amount) {
 }
 
 function playClickSound() {
-    // Создаем простой звуковой эффект
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -754,169 +712,26 @@ function playClickSound() {
     }
 }
 
-// ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
-function setupEventListeners() {
-    // Кликер
-    document.getElementById('clickButton')?.addEventListener('click', handleClick);
+// ==================== УПРАВЛЕНИЕ СЕКЦИЯМИ ====================
+function showDashboardSection() {
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('clicker').style.display = 'none';
+    document.getElementById('services').style.display = 'none';
     
-    // Улучшения
-    document.querySelectorAll('[data-action="buy"]').forEach(button => {
-        button.addEventListener('click', function() {
-            const upgradeType = this.closest('.upgrade-item').dataset.upgrade;
-            buyUpgrade(upgradeType);
-        });
-    });
+    // Прокручиваем к кабинету
+    document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
     
-    // Навигация в личном кабинете
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            
-            // Убираем активный класс у всех
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.dashboard-panel').forEach(panel => panel.classList.remove('active'));
-            
-            // Добавляем активный класс текущему
-            this.classList.add('active');
-            document.getElementById(targetId).classList.add('active');
-        });
-    });
-    
-    // Перемещение средств
-    document.getElementById('transferBtn')?.addEventListener('click', function() {
-        const amount = parseFloat(document.getElementById('transferAmount').value);
-        const account = document.getElementById('transferAccount').value;
-        
-        if (!amount || amount <= 0) {
-            showNotification('Введите корректную сумму', 'error');
-            return;
-        }
-        
-        if (!account) {
-            showNotification('Введите номер счета получателя', 'error');
-            return;
-        }
-        
-        if (currentUser.balance < amount) {
-            showNotification('Недостаточно средств на счете', 'error');
-            return;
-        }
-        
-        currentUser.balance -= amount;
-        saveUsers();
-        updateDashboard();
-        updateUI();
-        
-        showNotification(`Перевод ${formatCurrency(amount)} на счет ${account} выполнен`, 'success');
-        
-        // Очищаем поля
-        document.getElementById('transferAmount').value = '';
-        document.getElementById('transferAccount').value = '';
-    });
-    
-    // Пополнение вклада
-    document.getElementById('depositBtn')?.addEventListener('click', function() {
-        const amount = Math.floor(currentUser.balance * 0.3);
-        
-        if (amount > 0) {
-            showNotification(`Вклад пополнен на ${formatCurrency(amount)}. Доходность: 5.5% годовых`, 'success');
-        } else {
-            showNotification('Недостаточно средств для пополнения вклада', 'error');
-        }
-    });
-    
-    // Сохранение настроек
-    document.getElementById('saveSettings')?.addEventListener('click', function() {
-        const name = document.getElementById('settingsName').value;
-        const phone = document.getElementById('settingsPhone').value;
-        
-        if (name.length < 2) {
-            showNotification('Введите корректное ФИО', 'error');
-            return;
-        }
-        
-        currentUser.name = name;
-        currentUser.phone = phone;
-        saveUsers();
-        updateDashboard();
-        updateUI();
-        
-        showNotification('Настройки профиля сохранены', 'success');
-    });
-    
-    // Опасные действия
-    document.getElementById('resetProgress')?.addEventListener('click', function() {
-        if (confirm('Вы уверены? Весь прогресс в кликере будет сброшен!')) {
-            const userId = currentUser.email;
-            clickerData[userId] = {
-                balance: 100,
-                totalEarned: 100,
-                clicks: 0,
-                clicksToday: 0,
-                lastClickDate: new Date().toDateString(),
-                upgrades: {
-                    autoClicker: { level: 0, rate: 0 },
-                    doubleClick: { level: 0, multiplier: 1 },
-                    tripleClick: { level: 0, multiplier: 1 },
-                    timeWarp: { level: 0, multiplier: 1 }
-                },
-                achievements: {},
-                clickHistory: [],
-                autoClickerActive: false
-            };
-            
-            currentUser.balance = 100;
-            currentUser.totalEarned = 100;
-            currentUser.clicks = 0;
-            
-            saveUsers();
-            saveClickerData();
-            updateClickerUI();
-            updateDashboard();
-            updateUI();
-            
-            showNotification('Прогресс кликера сброшен', 'success');
-        }
-    });
-    
-    document.getElementById('deleteAccount')?.addEventListener('click', function() {
-        if (confirm('ВНИМАНИЕ: Вы собираетесь удалить аккаунт. Это действие нельзя отменить!')) {
-            users = users.filter(u => u.email !== currentUser.email);
-            delete clickerData[currentUser.email];
-            
-            saveUsers();
-            saveClickerData();
-            logout();
-            
-            showNotification('Аккаунт успешно удален', 'info');
-        }
-    });
+    // Обновляем данные
+    updateDashboard();
 }
 
-function setupUserMenu() {
-    const userMenuBtn = document.getElementById('userMenuBtn');
-    const userDropdown = document.getElementById('userDropdown');
+function showClickerSection() {
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('clicker').style.display = 'block';
+    document.getElementById('services').style.display = 'block';
     
-    if (userMenuBtn && userDropdown) {
-        userMenuBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-        });
-        
-        // Закрытие при клике вне меню
-        document.addEventListener('click', function() {
-            userDropdown.style.display = 'none';
-        });
-        
-        // Предотвращаем закрытие при клике внутри меню
-        userDropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-        
-        // Выход из системы
-        document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    }
+    // Прокручиваем к кликеру
+    document.getElementById('clicker').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
@@ -930,92 +745,275 @@ function showRegisterModal() {
     document.body.style.overflow = 'hidden';
 }
 
+function showTransferModal() {
+    document.getElementById('transferModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Сбрасываем форму
+    document.getElementById('transferForm').reset();
+    document.getElementById('commission').textContent = '0 ₽';
+    document.getElementById('totalToDeduct').textContent = '0 ₽';
+}
+
 function hideModals() {
     document.getElementById('loginModal').style.display = 'none';
     document.getElementById('registerModal').style.display = 'none';
+    document.getElementById('transferModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
 
-// Инициализация модальных окон
-document.getElementById('loginBtn')?.addEventListener('click', showLoginModal);
-document.getElementById('registerBtn')?.addEventListener('click', showRegisterModal);
-document.getElementById('mainLoginBtn')?.addEventListener('click', showLoginModal);
-document.getElementById('mainRegisterBtn')?.addEventListener('click', showRegisterModal);
-document.getElementById('promptLogin')?.addEventListener('click', showLoginModal);
-document.getElementById('promptRegister')?.addEventListener('click', showRegisterModal);
-
-document.getElementById('closeLoginModal')?.addEventListener('click', hideModals);
-document.getElementById('closeRegisterModal')?.addEventListener('click', hideModals);
-
-document.getElementById('switchToRegister')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    hideModals();
-    showRegisterModal();
-});
-
-document.getElementById('switchToLogin')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    hideModals();
-    showLoginModal();
-});
-
-// Закрытие модальных окон при клике вне
-window.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        hideModals();
-    }
-});
-
-// Форма входа
-document.getElementById('loginForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+// ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+function setupEventListeners() {
+    // Мобильное меню
+    document.getElementById('menuToggle')?.addEventListener('click', function() {
+        const navMenu = document.getElementById('navMenu');
+        navMenu.classList.toggle('active');
+        this.innerHTML = navMenu.classList.contains('active') 
+            ? '<i class="fas fa-times"></i>' 
+            : '<i class="fas fa-bars"></i>';
+    });
     
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    // Закрытие мобильного меню при клике на ссылку
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            const navMenu = document.getElementById('navMenu');
+            const menuToggle = document.getElementById('menuToggle');
+            if (navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+    });
     
-    // Демо-доступ
-    if (email === 'demo@xyzbank.ru' && password === 'demo123') {
-        if (!users.find(u => u.email === 'demo@xyzbank.ru')) {
-            registerUser('Демо Пользователь', 'demo@xyzbank.ru', 'demo123');
-        } else {
-            const user = users.find(u => u.email === 'demo@xyzbank.ru');
-            loginUser(user);
+    // Плавная прокрутка
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#' || href === '#dashboard') return;
+            
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Кликер
+    document.getElementById('clickButton')?.addEventListener('click', handleClick);
+    
+    // Улучшения
+    document.querySelectorAll('.buy-upgrade').forEach(button => {
+        button.addEventListener('click', function() {
+            const upgradeType = this.closest('.upgrade-item').dataset.upgrade;
+            buyUpgrade(upgradeType);
+        });
+    });
+    
+    // Кнопки входа в кликере
+    document.getElementById('promptLoginBtn')?.addEventListener('click', showLoginModal);
+    document.getElementById('promptRegisterBtn')?.addEventListener('click', showRegisterModal);
+    
+    // Быстрый перевод
+    document.getElementById('quickTransferBtn')?.addEventListener('click', function() {
+        const cardNumber = document.getElementById('quickCardNumber').value;
+        const amount = parseFloat(document.getElementById('quickAmount').value);
+        
+        if (transferMoney(cardNumber, amount, 'Быстрый перевод')) {
+            // Очищаем поля
+            document.getElementById('quickCardNumber').value = '';
+            document.getElementById('quickAmount').value = '';
         }
-        hideModals();
-        return;
-    }
+    });
     
-    // Поиск пользователя
-    const user = users.find(u => u.email === email && u.password === password);
+    // Подробный перевод
+    document.getElementById('openTransferModalBtn')?.addEventListener('click', showTransferModal);
     
-    if (user) {
-        loginUser(user);
+    // Выход из системы
+    document.getElementById('logoutBtn')?.addEventListener('click', logout);
+    
+    // Закрытие модальных окон
+    document.getElementById('closeLoginModal')?.addEventListener('click', hideModals);
+    document.getElementById('closeRegisterModal')?.addEventListener('click', hideModals);
+    document.getElementById('closeTransferModal')?.addEventListener('click', hideModals);
+    
+    // Переключение между модальными окнами
+    document.getElementById('switchToRegister')?.addEventListener('click', function(e) {
+        e.preventDefault();
         hideModals();
-    } else {
-        showNotification('Неверный email или пароль', 'error');
-    }
-});
+        showRegisterModal();
+    });
+    
+    document.getElementById('switchToLogin')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        hideModals();
+        showLoginModal();
+    });
+    
+    // Форма входа
+    document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        // Демо-доступ
+        if (email === 'demo@xyzbank.ru' && password === 'demo123') {
+            let user = users.find(u => u.email === 'demo@xyzbank.ru');
+            if (!user) {
+                user = DEMO_USER;
+                users.push(user);
+                saveUsers();
+            }
+            loginUser(user);
+            hideModals();
+            return;
+        }
+        
+        // Поиск пользователя
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (user) {
+            loginUser(user);
+            hideModals();
+        } else {
+            showNotification('Неверный email или пароль', 'error');
+        }
+    });
+    
+    // Форма регистрации
+    document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const confirmPassword = document.getElementById('regConfirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            showNotification('Пароли не совпадают', 'error');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showNotification('Пароль должен содержать минимум 6 символов', 'error');
+            return;
+        }
+        
+        if (registerUser(name, email, password)) {
+            hideModals();
+        }
+    });
+    
+    // Форма перевода
+    document.getElementById('transferForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const cardNumber = document.getElementById('transferCardNumber').value.replace(/\s/g, '');
+        const amount = parseFloat(document.getElementById('transferAmount').value);
+        const description = document.getElementById('transferMessage').value;
+        
+        if (transferMoney(cardNumber, amount, description)) {
+            hideModals();
+        }
+    });
+    
+    // Расчет комиссии в реальном времени
+    document.getElementById('transferAmount')?.addEventListener('input', function() {
+        const amount = parseFloat(this.value) || 0;
+        const commission = Math.max(10, amount * 0.01);
+        const total = amount + commission;
+        
+        document.getElementById('commission').textContent = formatCurrency(commission);
+        document.getElementById('totalToDeduct').textContent = formatCurrency(total);
+    });
+    
+    // Форматирование номера карты
+    document.getElementById('transferCardNumber')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+        if (value.length > 16) value = value.substring(0, 16);
+        
+        // Добавляем пробелы через каждые 4 цифры
+        const formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = formatted;
+    });
+    
+    document.getElementById('quickCardNumber')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+        if (value.length > 16) value = value.substring(0, 16);
+        
+        // Добавляем пробелы через каждые 4 цифры
+        const formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = formatted;
+    });
+    
+    // Закрытие модальных окон при клике вне
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            hideModals();
+        }
+    });
+}
 
-// Форма регистрации
-document.getElementById('registerForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
-    const confirmPassword = document.getElementById('regConfirmPassword').value;
-    
-    if (password !== confirmPassword) {
-        showNotification('Пароли не совпадают', 'error');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showNotification('Пароль должен содержать минимум 6 символов', 'error');
-        return;
-    }
-    
-    if (registerUser(name, email, password)) {
-        hideModals();
+// ==================== ЗАГРУЗКА СТРАНИЦЫ ====================
+// Инициализируем при загрузке
+window.addEventListener('load', function() {
+    // Добавляем стили для уведомлений если их нет
+    if (!document.querySelector('#notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 8px;
+                padding: 1rem 1.5rem;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                min-width: 300px;
+                max-width: 400px;
+                z-index: 9999;
+                transform: translateX(100%);
+                opacity: 0;
+                transition: transform 0.3s ease, opacity 0.3s ease;
+            }
+            .notification-success { border-left: 4px solid #36b37e; }
+            .notification-error { border-left: 4px solid #ff6b6b; }
+            .notification-warning { border-left: 4px solid #ffab00; }
+            .notification-info { border-left: 4px solid #0052cc; }
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .notification-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #666;
+                cursor: pointer;
+                line-height: 1;
+            }
+            .user-balance-nav {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 600;
+                color: var(--primary);
+            }
+            @media (max-width: 768px) {
+                .notification {
+                    min-width: 250px;
+                    right: 10px;
+                    left: 10px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 });
